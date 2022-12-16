@@ -5,9 +5,9 @@ module.exports = {
 	},
 	urls: [
 		"https://paulkinchla.com",
-		"https://paulkinchla.com/about",
-		"https://paulkinchla.com/work",
-		"https://paulkinchla.com/blog",
+		"https://paulkinchla.com/about/",
+		"https://paulkinchla.com/work/",
+		"https://paulkinchla.com/blog/",
 		"https://paulkinchla.com/blog/javascript-still-a-ghost/",
     "https://paulkinchla.com/work/fixit/"
 	]
