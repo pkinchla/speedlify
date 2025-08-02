@@ -346,7 +346,7 @@ module.exports = function (eleventyConfig) {
   // Assets
   eleventyConfig.addPassthroughCopy({
     "./node_modules/chartist/dist/chartist.js": "chartist.js",
-    "./node_modules/chartist/dist/index.css.map": "chartist.css.map",
+    "./node_modules/chartist/dist/chartist.css.map": "chartist.css.map",
   });
 
   eleventyConfig.addWatchTarget("./assets/");
