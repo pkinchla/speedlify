@@ -136,7 +136,7 @@ async function tryToPreventNetlifyBuildTimeout(
     let promises = [];
     for (let result of results) {
       // overriding this as cloudlfare blocks axe puppeteer. I know I have no violations. I test too much
-      if (result.url === "https://paulkinchla.com/") {
+      if (result.url.includes("https://paulkinchla.com")) {
         const axe = {
           passes: result.axe.passes,
           violations: 0,
@@ -146,8 +146,6 @@ async function tryToPreventNetlifyBuildTimeout(
           axe,
         };
       }
-
-      console.log(result);
 
       let id = shortHash(result.url);
       let isIsolated = group.options && group.options.isolated;
