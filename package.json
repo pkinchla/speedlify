@@ -30,17 +30,17 @@
   },
   "homepage": "https://github.com/zachleat/speedlify#readme",
   "dependencies": {
-    "@11ty/eleventy": "^2.0.1",
-    "@11ty/eleventy-fetch": "^4.0.0",
+    "@11ty/eleventy": "^3.1.2",
+    "@11ty/eleventy-fetch": "^5.1.0",
     "byte-size": "^8.1.1",
-    "chartist": "^0.11.4",
-    "cross-zip": "^4.0.0",
-    "dotenv": "^16.3.1",
+    "chartist": "^1.4.0",
+    "cross-zip": "^4.0.1",
+    "dotenv": "^17.2.1",
     "fast-glob": "^3.2.12",
     "lodash": "^4.17.21",
-    "performance-leaderboard": "^11.0.0",
-    "puppeteer": "^21.3.8",
+    "performance-leaderboard": "^12.8.1",
+    "puppeteer": "^24.15.0",
     "short-hash": "^1.0.0",
-    "speedlify-score": "^3.0.0"
+    "speedlify-score": "^4.0.4"
   }
 }
