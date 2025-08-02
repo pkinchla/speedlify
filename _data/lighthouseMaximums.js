@@ -14,7 +14,6 @@ module.exports = {
     tti: 3875,
     tbt: 287,
     cls: 0.1,
-    // fid: 130,
+    fid: 130,
   },
-  
 };
