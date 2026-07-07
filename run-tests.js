@@ -4,6 +4,8 @@ const fs = require("fs").promises;
 const shortHash = require("short-hash");
 const fastglob = require("fast-glob");
 const PerfLeaderboard = require("performance-leaderboard");
+const puppeteer = require("puppeteer");
+const { AxePuppeteer } = require("@axe-core/puppeteer");
 
 const NUMBER_OF_RUNS = 3;
 const FREQUENCY = 60; // in minutes
@@ -25,6 +27,38 @@ const prettyTime = (seconds) => {
     Math.ceil(days / 7) + " weeks ago"
   );
 };
+
+function countAxeEntries(rawResults, key) {
+  let count = 0;
+  for (let entry of rawResults[key]) {
+    count += entry.nodes.length || 1;
+  }
+  return count;
+}
+
+// performance-leaderboard's built-in axe scanner can't be given a custom
+// User-Agent, so sites behind a Cloudflare bot challenge (see bypassAxe in
+// site config) need their axe scan run here instead, tagged the same way
+// the Lighthouse run is.
+async function runAxeWithUserAgent(url, userAgent) {
+  const browser = await puppeteer.launch({ headless: "new" });
+  try {
+    const page = await browser.newPage();
+    await page.setUserAgent(userAgent);
+    await page.setBypassCSP(true);
+    await page.goto(url, {
+      waitUntil: ["load", "networkidle0"],
+      timeout: 30000,
+    });
+    const rawResults = await new AxePuppeteer(page).analyze();
+    return {
+      passes: countAxeEntries(rawResults, "passes"),
+      violations: countAxeEntries(rawResults, "violations"),
+    };
+  } finally {
+    await browser.close();
+  }
+}
 
 async function tryToPreventNetlifyBuildTimeout(
   dateTestsStarted,
@@ -135,16 +169,30 @@ async function tryToPreventNetlifyBuildTimeout(
 
     let promises = [];
     for (let result of results) {
-      // overriding this as cloudlfare blocks axe puppeteer. I know I have no violations. I test too much
-      if (result.url.includes("https://paulkinchla.com")) {
-        const axe = {
-          passes: result.axe.passes,
-          violations: 0,
-        };
-        result = {
-          ...result,
-          axe,
-        };
+      // Lighthouse normalizes requestedUrl (e.g. adds a trailing slash), so
+      // compare against bypassAxe with trailing slashes stripped on both sides.
+      let normalizeUrl = (url) => (url || "").replace(/\/$/, "");
+      let bypassAxe = ((group.options && group.options.bypassAxe) || []).map(
+        normalizeUrl
+      );
+      let bypassAxeUserAgent = group.options && group.options.bypassAxeUserAgent;
+      if (
+        bypassAxeUserAgent &&
+        bypassAxe.includes(normalizeUrl(result.requestedUrl))
+      ) {
+        console.log(`Running Cloudflare-tagged axe scan for ${result.requestedUrl}`);
+        try {
+          const axe = await runAxeWithUserAgent(
+            result.requestedUrl,
+            bypassAxeUserAgent
+          );
+          result = {
+            ...result,
+            axe,
+          };
+        } catch (e) {
+          console.log(`Cloudflare-tagged axe scan failed for ${result.requestedUrl}: `, e);
+        }
       }
 
       let id = shortHash(result.url);
